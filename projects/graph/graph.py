@@ -11,29 +11,40 @@ class Graph:
         
 
     def add_vertex(self, vertex_id):
-        """
-        Add a vertex to the graph.
-        """
         self.vertices[vertex_id] = set()
         
 
     def add_edge(self, v1, v2):
-        self.vertices[v1].add(v2)
-        pass  # TODO
+        
+        if v1 not in self.vertices:
+            return None
+        else:
+            self.vertices[v1].add(v2)
+        
 
     def get_neighbors(self, vertex_id):
-        """
-        Get all neighbors (edges) of a vertex.
-        """
-        pass  # TODO
+        return self.vertices[vertex_id]
 
     def bft(self, starting_vertex):
-        """
-        Print each vertex in breadth-first order
-        beginning from starting_vertex.
-        """
-        pass  # TODO
-
+        q = Queue()
+        
+        q.enqueue(starting_vertex)
+        visited = set()
+        
+        while q.size() > 0:
+            current = q.dequeue()
+        
+            if current not in visited:
+                visited.add(current)
+                
+                edges = self.get_neighbors(current)
+                
+                for edge in edges:
+                    q.enqueue(edge)
+                    
+        print(visited)
+            
+            
     def dft(self, starting_vertex):
         """
         Print each vertex in depth-first order
@@ -86,7 +97,7 @@ if __name__ == '__main__':
     graph.add_vertex(5)
     graph.add_vertex(6)
     graph.add_vertex(7)
-    graph.add_edge(5, 3)
+    graph.add_edge(10, 3)
     graph.add_edge(6, 3)
     graph.add_edge(7, 1)
     graph.add_edge(4, 7)
@@ -96,6 +107,7 @@ if __name__ == '__main__':
     graph.add_edge(3, 5)
     graph.add_edge(2, 3)
     graph.add_edge(4, 6)
+    # print(graph.get_neighbors(2))
 
     '''
     Should print:
@@ -118,8 +130,7 @@ if __name__ == '__main__':
         1, 2, 4, 3, 7, 6, 5
         1, 2, 4, 3, 7, 5, 6
     '''
-    graph.bft(1)
-
+    graph.bft(4)
     '''
     Valid DFT paths:
         1, 2, 3, 5, 4, 6, 7
