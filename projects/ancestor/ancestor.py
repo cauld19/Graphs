@@ -21,7 +21,7 @@ def earliest_ancestor(ancestors, starting_node):
     if len(ancestors_obj) < 1:
             return  -1
     else:        
-        for idx,(k,v) in enumerate(ancestors_obj.items()):
+        for k,v in ancestors_obj.items():
             if len(ancestors_obj) < 2:
                 return k
             elif len(ancestors_obj) == 2:
