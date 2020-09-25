@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from collections import deque
 
 import random
 from ast import literal_eval
@@ -29,6 +30,141 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 
+
+def solution_attempt(world, starting_location):
+    
+    ## at starting room choose random direction
+        ## at each room check to see number of directions
+            ## if greater than 2 store in queue the room_id and direction
+            ## that is not the opposite direction of the way headed
+        ## DFT until room.exits has only one direction(returning backwards)
+            ## look in queue and take most recent saved room id and direction
+            ## DFT traverse through that 
+        ## store every direction taken and return that
+
+    queue = deque()
+    stack = deque()
+    stack.append(starting_location)
+    
+    visited = {}
+    waiting_visit = {}
+    
+    number_of_visits = 0
+    
+    opposites = [('n', 's'), ('e', 'w'), ('w', 'e'), ('s', 'n')]
+    
+    # if len(visited) < 8 and len(visited) > 1:
+    #     stack.append(queue.popleft())
+    #     while len(stack) > 0:
+    #         print("in while loop")
+    #         current = stack.pop()
+    #         if current not in visited:
+    #             visited[current] = number_of_visits + 1
+            
+    #         directions = player.current_room.get_exits()
+            
+    #         random_direction = random.choice(directions)
+            
+    #         if len(directions) == 1:
+    #             traversal_path.append(random_direction)
+    #             player.travel(random_direction)
+    #             if player.current_room.id in visited and len(queue) > 0:
+                    
+    #                 stack.append(queue.popleft())
+    #             elif player.current_room.id in visited:
+    #                 continue
+    #             else:
+    #                 stack.append(player.current_room.id)
+                
+            
+    #         elif len(directions) == 2:
+    #             for direction in directions:
+    #                 if len(traversal_path) < 1:
+    #                     break
+    #                 if (random_direction, traversal_path[-1]) in opposites:
+    #                     while (random_direction, traversal_path[-1]) in opposites:
+    #                           random_direction = random.choice(directions)
+    #             traversal_path.append(random_direction)
+    #             player.travel(random_direction)
+    #             stack.append(player.current_room.id)
+            
+    #         elif len(directions) > 2:
+    #             for direction in directions:
+    #                 if len(traversal_path) < 1:
+    #                     break
+    #                 if random_direction == direction:
+    #                     continue
+    #                 elif (random_direction, traversal_path[-1]) in opposites:
+    #                     while (random_direction, traversal_path[-1]) in opposites:
+    #                           random_direction = random.choice(directions)
+    #             queue.append(current)
+    #             waiting_visit[current] = direction
+    #             traversal_path.append(random_direction)
+    #             player.travel(random_direction)
+    #             stack.append(player.current_room.id)
+    # else:
+    while len(stack) > 0 and len(visited) < 500:
+        current = stack.pop()
+        player.current_room.id = current
+        
+        if current not in visited:
+            visited[current] = number_of_visits + 1
+        
+        directions = player.current_room.get_exits()
+        
+        random_direction = random.choice(directions)
+        
+        if len(directions) == 1:
+            traversal_path.append(random_direction)
+            player.travel(random_direction)
+            if player.current_room.id in visited and len(queue) > 0:
+                
+                stack.append(queue.popleft())
+            elif player.current_room.id in visited:
+                continue
+            else:
+                stack.append(player.current_room.id)
+            
+        
+        elif len(directions) == 2:
+            for direction in directions:
+                if len(traversal_path) < 1:
+                    break
+                if (random_direction, traversal_path[-1]) in opposites:
+                    while (random_direction, traversal_path[-1]) in opposites:
+                            random_direction = random.choice(directions)
+
+            traversal_path.append(random_direction)
+            player.travel(random_direction)
+            stack.append(player.current_room.id)
+        
+        elif len(directions) > 2:
+            for direction in directions:
+                if len(traversal_path) < 1:
+                    break
+                if random_direction == direction:
+                    continue
+                elif (random_direction, traversal_path[-1]) in opposites:
+                    while (random_direction, traversal_path[-1]) in opposites:
+                            random_direction = random.choice(directions)
+            queue.append(current)
+            waiting_visit[current] = direction
+            traversal_path.append(random_direction)
+            player.travel(random_direction)
+            stack.append(player.current_room.id)
+            
+                       
+        
+                    
+
+        
+        ## create a queue
+        ## if room has more than two directions(not going backward and jsut contionuing forward)
+            ## queue room id and get neighbor for bfs when the dft ends
+        
+        # traversal_path.append() ## push direction went
+
+solution_attempt(world, player.current_room.id)
 
 
 # TRAVERSAL TEST
