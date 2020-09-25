@@ -11,11 +11,11 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-# map_file = "maps/test_line.txt"
+map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-map_file = "maps/main_maze.txt"
+# map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -30,140 +30,131 @@ player = Player(world.starting_room)
 # traversal_path = ['n', 'n']
 traversal_path = []
 
+def give_opposite_direction(direction):
+    if direction == 'n':
+        return 's'
+    if direction == 's':
+        return 'n'
+    if direction == 'w':
+        return 'e'
+    if direction == 'e':
+        return 'w'
+
+
 
 def solution_attempt(world, starting_location):
     
-    ## at starting room choose random direction
-        ## at each room check to see number of directions
-            ## if greater than 2 store in queue the room_id and direction
-            ## that is not the opposite direction of the way headed
-        ## DFT until room.exits has only one direction(returning backwards)
-            ## look in queue and take most recent saved room id and direction
-            ## DFT traverse through that 
-        ## store every direction taken and return that
-    traversal_path_rooms = {}
-    queue = deque()
+    
     stack = deque()
     stack.append(starting_location)
+    previous_room = []
+    
+    
     
     visited = {}
 
-    print(stack)
+
+
     
-    opposites = [('n', 's'), ('e', 'w'), ('w', 'e'), ('s', 'n')]
     
 
-    while len(stack) > 0 and len(visited) < 500:
-
+    while len(visited) < 3:
+        print(visited)
+        print(stack)
         current = stack.pop()
-        player.current_room.id = current
         
+        previous_room.append(current)
         
         directions = player.current_room.get_exits()
-        print(directions)
-        print(visited)
-        
         random_direction = random.choice(directions)
-        
+
         if current not in visited:
-            # print("here")
-            # if len(directions) == 1:
-            #     traversal_path_rooms[current].append(random_direction)
+            visited[current] = dict.fromkeys(directions, "?")
+            
+
+        if len(directions) == 1:
+       
+            player.travel(random_direction) ## move to next room
+            visited[current][random_direction] = player.current_room.id ## set first room
+            
+            opposite_direction = give_opposite_direction(random_direction) ## function to give opposite direction
+            
+            directions = player.current_room.get_exits() ## new directions for next room
+            print(visited)
+            visited[player.current_room.id] = dict.fromkeys(directions, "?") ## create new room       
+            print(visited)         
+            visited[player.current_room.id][opposite_direction] = current ## set current room with previous rooms direction
+            print(visited)
+            
+            stack.append(player.current_room.id) ## add new room to stack
+            traversal_path.append(random_direction) ## add path to traversal
+
+            
+            
+        elif len(directions) == 2: ## if two directions to go
+            
+            for key, value in visited[player.current_room.id].items(): ## find room direction with ? and set direction to it
+                
+                if value == '?':
+                    random_direction = key
+                    print(random_direction, "wtf")
+                    
+            player.travel(random_direction) ## move to next room
+            visited[current][random_direction] = player.current_room.id ## set room
+            
+            opposite_direction_two = give_opposite_direction(random_direction)
+            
+            visited[player.current_room.id] = dict.fromkeys(directions, "?")
+            
+            visited[player.current_room.id][opposite_direction_two] = current ## set current room with previous rooms direction
+            
+            stack.append(player.current_room.id) ## add new room to stack
+            traversal_path.append(random_direction) ## add path to traversal
+            
+                
+
+                
+            # elif len(directions) >= 3: ## if greater than two directions make sure not going back where you came from
+            #     print("more than three directions")
+            #     if len(traversal_path) > 0 and (random_direction, traversal_path[-1]) in opposites:
+            #         while (random_direction, traversal_path[-1]) in opposites:
+            #             random_direction = random.choice(directions)
+                        
+                
+                
             #     traversal_path.append(random_direction)
+            #     queue.appendleft(current)
             #     player.travel(random_direction)
             #     stack.append(player.current_room.id)
-                
-                
-            if len(directions) == 1: ## if only one way to go at end of traversal, take what was in queue and put to stack
-                stack.append(queue.popleft)
-                
-                
-            elif len(directions) == 2: ## if two directions to go
-                if len(traversal_path) > 0 and (random_direction, traversal_path[-1]) in opposites: ## make sure random way to go is not backwards where you came from
-                    while (random_direction, traversal_path[-1]) in opposites:
-                        # print(traversal_path[-1])
-                        random_direction = random.choice(directions)
-                        
-                traversal_path_rooms[current] = random_direction
-                traversal_path.append(random_direction)
-                player.travel(random_direction)
-                stack.append(player.current_room.id)
-                
-            elif len(directions) > 2: ## if greater than two directions make sure not going back where you came from
-                
-                if len(traversal_path) > 0 and (random_direction, traversal_path[-1]) in opposites:
-                    while (random_direction, traversal_path[-1]) in opposites:
-                        random_direction = random.choice(directions)
-                        print("are you stuck here")
-                visited[current] = 1
-                traversal_path_rooms[current] = random_direction
-                traversal_path.append(random_direction)
-                queue.appendleft(current)
-                player.travel(random_direction)
-                stack.append(player.current_room.id)
 
                 
                 
-        elif current in visited:
-            if current in traversal_path_rooms:
-                for key, value in traversal_path_rooms.items():
-                    if current == key:
-                        if value in directions:
-                            directions.remove(value)
-                visited[current] += 1            
-                random_direction = random.choice(directions)
-                traversal_path_rooms[current] = random_direction
-                traversal_path.append(random_direction)
-                player.travel(random_direction)
-                stack.append(player.current_room.id)
-                
-                directions = player.current_room.get_exits()
-                if visited[current] < len(directions):
-                    queue.appendleft(current)
+        # elif current in visited:
+        #     print("in visited")
             
-
-                
-        # if len(directions) == 1:
-        #     traversal_path.append(random_direction)
+        #     # print(current, "pre removing", directions)
+             
+        #     # if current in rooms_with_many_connections:
+        #     #     for key, value in rooms_with_many_connections.items():
+        #     #         print("key/value", key,value)
+        #     #         for i in value:
+        #     #             print("values in i", i, "directions:", directions) 
+        #     #             if current == key:
+        #     #                 if i in directions:
+        #     #                     directions.remove(i)
+        #     #                     print(directions)
+                                
+                            
+        #     random_direction = random.choice(directions)
         #     player.travel(random_direction)
-        #     if player.current_room.id in visited and len(queue) > 0:
-                
-        #         stack.append(queue.popleft())
-        #     elif player.current_room.id in visited:
-        #         continue
-        #     else:
-        #         stack.append(player.current_room.id)
+        #     traversal_path.append(random_direction)
+        #     stack.append(player.current_room.id)
             
-        
-        # elif len(directions) == 2:
-        #     for direction in directions:
-        #         if len(traversal_path) < 1:
-        #             break
-        #         if (random_direction, traversal_path[-1]) in opposites:
-        #             while (random_direction, traversal_path[-1]) in opposites:
-        #                     random_direction = random.choice(directions)
-
-        #     traversal_path.append(random_direction)
-        #     player.travel(random_direction)
-        #     stack.append(player.current_room.id)
-        
-        # elif len(directions) > 2:
-        #     for direction in directions:
-        #         if len(traversal_path) < 1:
-        #             break
-        #         if random_direction == direction:
-        #             continue
-        #         elif (random_direction, traversal_path[-1]) in opposites:
-        #             while (random_direction, traversal_path[-1]) in opposites:
-        #                     random_direction = random.choice(directions)
-        #     queue.append(current)
-        #     waiting_visit[current] = direction
-        #     traversal_path.append(random_direction)
-        #     player.travel(random_direction)
-        #     stack.append(player.current_room.id)
+        #     directions = player.current_room.get_exits()
+    print(traversal_path)
+    print(visited)
             
                        
-        
 solution_attempt(world, player.current_room.id)
 
 
