@@ -11,11 +11,11 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
+# map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -39,72 +39,128 @@ def give_opposite_direction(direction):
         return 'e'
     if direction == 'e':
         return 'w'
+    
+def bfs(word, visited_rooms, starting_location, stack):
+    queue = deque()
+        
+    visited = {}
+    queue.appendleft(starting_location)
+    
+    print("in bfs")
+    direction = ""
+    
+    while len(queue)> 0:
+        current = queue.popleft()
+        
+        
+        
+        
+        
+    
+        if current not in visited:
+            visited[current] = 0
+            # print(current)
+            # print(visited_rooms)
+            
+            if current not in visited_rooms:
+                stack.append(current)
+                break
+                
+            for key, value in visited_rooms[current].items():
+                player.travel(direction)
+                # print(key, value)
+                if value == '?':
+                    direction = key
+                    
+                    traversal_path.append(direction)
+                    player.travel(direction)
+                    stack.append(key)
+                    break
+                else:
+                    queue.appendleft(player.current_room.id)
+                    # direction = key
+                    traversal_path.append(direction)
+                    
+                    
+            
+
+    
 
 
 
 def solution_attempt(world, starting_location):
-    
-    
+    print(" in dft")
+    queue = deque()
     stack = deque()
     stack.append(starting_location)
-    previous_room = []
-    
     
     
     visited = {}
 
 
 
-    
-    
-
-    while len(visited) < 3:
-        print(visited)
-        print(stack)
+    while len(visited) < 500:
+        
         current = stack.pop()
         
-        previous_room.append(current)
         
         directions = player.current_room.get_exits()
         random_direction = random.choice(directions)
 
-        if current not in visited:
-            visited[current] = dict.fromkeys(directions, "?")
-            
+        # if current not in visited:
+        #     visited[current] = dict.fromkeys(directions, "?")
+        opposite_direction = give_opposite_direction(random_direction)  
+        
+        if len(directions) == 1 and len(visited) > 0:
+              bfs(world, visited, current, stack)
 
         if len(directions) == 1:
-       
+            if current not in visited:
+                visited[current] = dict.fromkeys(directions, "?")
+            
             player.travel(random_direction) ## move to next room
             visited[current][random_direction] = player.current_room.id ## set first room
+            
             
             opposite_direction = give_opposite_direction(random_direction) ## function to give opposite direction
             
             directions = player.current_room.get_exits() ## new directions for next room
-            print(visited)
-            visited[player.current_room.id] = dict.fromkeys(directions, "?") ## create new room       
-            print(visited)         
+            
+            if player.current_room.id not in visited:
+                visited[player.current_room.id] = dict.fromkeys(directions, "?")
+                  
+                    
             visited[player.current_room.id][opposite_direction] = current ## set current room with previous rooms direction
-            print(visited)
+            
             
             stack.append(player.current_room.id) ## add new room to stack
             traversal_path.append(random_direction) ## add path to traversal
+            
+            
 
             
             
         elif len(directions) == 2: ## if two directions to go
+            if current not in visited:
+                visited[current] = dict.fromkeys(directions, "?")
+            
             
             for key, value in visited[player.current_room.id].items(): ## find room direction with ? and set direction to it
                 
                 if value == '?':
                     random_direction = key
-                    print(random_direction, "wtf")
                     
             player.travel(random_direction) ## move to next room
             visited[current][random_direction] = player.current_room.id ## set room
             
             opposite_direction_two = give_opposite_direction(random_direction)
             
-            visited[player.current_room.id] = dict.fromkeys(directions, "?")
+            directions = player.current_room.get_exits() ## new directions for next room
+            
+            if player.current_room.id not in visited:
+                visited[player.current_room.id] = dict.fromkeys(directions, "?") ## create new room
+                
+             
             
             visited[player.current_room.id][opposite_direction_two] = current ## set current room with previous rooms direction
             
@@ -113,7 +169,33 @@ def solution_attempt(world, starting_location):
             
                 
 
+        elif len(directions) > 2: ## if possible directions is greater than two
+            
+            if current not in visited:
+                visited[current] = dict.fromkeys(directions, "?")
                 
+            for key, value in visited[player.current_room.id].items(): ## find room direction with ? and set direction to it
+                
+                if value == '?':
+                    random_direction = key
+                    
+                    break
+                
+            player.travel(random_direction) ## move to next room
+            visited[current][random_direction] = player.current_room.id ## set first room
+            
+            opposite_direction = give_opposite_direction(random_direction) ## function to give opposite direction
+            
+            directions = player.current_room.get_exits() ## new directions for next room
+            
+            visited[player.current_room.id] = dict.fromkeys(directions, "?") ## create new room       
+                    
+            visited[player.current_room.id][opposite_direction] = current ## set current room with previous rooms direction
+            
+            
+            stack.append(player.current_room.id) ## add new room to stack
+            traversal_path.append(random_direction) ## add path to traversal
+            
             # elif len(directions) >= 3: ## if greater than two directions make sure not going back where you came from
             #     print("more than three directions")
             #     if len(traversal_path) > 0 and (random_direction, traversal_path[-1]) in opposites:
@@ -151,8 +233,8 @@ def solution_attempt(world, starting_location):
         #     stack.append(player.current_room.id)
             
         #     directions = player.current_room.get_exits()
-    print(traversal_path)
-    print(visited)
+    
+    print("bottom of solution function", visited)
             
                        
 solution_attempt(world, player.current_room.id)
